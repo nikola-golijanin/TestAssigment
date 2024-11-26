@@ -1,0 +1,6 @@
+@TestAssigmentAPI_HostAddress = http://localhost:5056
+
+GET {{TestAssigmentAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+X-API-Key : generated-api-key-1
+###
