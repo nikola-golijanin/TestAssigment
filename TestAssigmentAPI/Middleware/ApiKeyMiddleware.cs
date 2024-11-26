@@ -7,24 +7,19 @@ namespace TestAssigmentAPI.Middleware;
 public class ApiKeyMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly IConfiguration _configuration;
     private readonly ClientsOptions _clientsOptions;
 
 
     private const string ApiKeyHeaderName = "X-API-Key";
-    private const string ApiKeyName = "ApiKey";
 
-    public ApiKeyMiddleware(RequestDelegate next, IConfiguration configuration, IOptions<ClientsOptions> clientsOptions)
+    public ApiKeyMiddleware(RequestDelegate next, IOptions<ClientsOptions> clientsOptions)
     {
         _next = next;
-        _configuration = configuration;
         _clientsOptions = clientsOptions.Value;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
-
-        //string? userApiKey = context.Request.Headers[ApiKeyHeaderName];
 
         if (!context.Request.Headers.TryGetValue(ApiKeyHeaderName, out var userApiKey))
         {
@@ -32,8 +27,6 @@ public class ApiKeyMiddleware
             await context.Response.WriteAsync("Api Key was not provided ");
             return;
         }
-
-        //var apiKey = _configuration[ApiKeyName];
 
         var apiKey = _clientsOptions.Clients
             .Where(c => c.ApiKey == userApiKey)
