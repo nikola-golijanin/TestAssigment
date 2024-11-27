@@ -48,3 +48,26 @@ internal sealed class ApiKeyAttribute : IAsyncActionFilter
             _ => true
         };
 }
+
+public class RequestLoggingFilter : IAsyncActionFilter
+{
+    private readonly ILogger<RequestLoggingFilter> _logger;
+
+    public RequestLoggingFilter(ILogger<RequestLoggingFilter> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    {
+        var httpContext = context.HttpContext;
+        var request = httpContext.Request;
+
+        _logger.LogInformation("Handling request: {Method} {Path}", request.Method, request.Path);
+
+        await next();
+
+        var response = httpContext.Response;
+        _logger.LogInformation("Handled request: {Method} {Path} with status code {StatusCode}", request.Method, request.Path, response.StatusCode);
+    }
+}
