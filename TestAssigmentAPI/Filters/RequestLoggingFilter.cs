@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
 using TestAssigmentAPI.Options;
 
-namespace TestAssigmentAPI.Middleware;
+namespace TestAssigmentAPI.Filters;
 
 public class RequestLoggingFilter : IAsyncActionFilter
 {

@@ -1,7 +1,6 @@
 using Serilog;
 using TestAssigmentAPI.Extensions;
 using TestAssigmentAPI.Filters;
-using TestAssigmentAPI.Middleware;
 using TestAssigmentAPI.Options;
 
 var builder = WebApplication.CreateBuilder(args);
