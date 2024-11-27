@@ -16,6 +16,7 @@ builder.Services
     .Validate(ClientsOptions.ValidateClients, "ApiKey or Name cannot be empty")
     .ValidateOnStart();
 
+builder.Services.AddScoped<ApiKeyAttribute>();
 
 var app = builder.Build();
 
@@ -26,7 +27,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<ApiKeyMiddleware>();
+//app.UseMiddleware<ApiKeyMiddleware>();
 
 app.UseHttpsRedirection();
 

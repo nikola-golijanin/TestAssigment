@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using TestAssigmentAPI.Middleware;
 
 namespace TestAssigmentAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [ServiceFilter(typeof(ApiKeyAttribute))]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -30,16 +32,5 @@ namespace TestAssigmentAPI.Controllers
             .ToArray();
         }
 
-        [HttpPost(Name = "GetWeatherForecast2")]
-        public IEnumerable<WeatherForecast> Get2([FromBody] User user)
-        {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
-        }
     }
 }
