@@ -3,48 +3,31 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
 using TestAssigmentAPI.Options;
 
-namespace TestAssigmentAPI.Middleware;
+namespace TestAssigmentAPI.Filters;
 
-internal sealed class ApiKeyAttribute : IAsyncActionFilter
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+internal sealed class ApiKeyAttribute : Attribute, IAuthorizationFilter
 {
     private const string ApiKeyHeaderName = "X-API-Key";
 
-    private readonly ClientsOptions _clientsOptions;
-
-    public ApiKeyAttribute(IOptions<ClientsOptions> clientsOptions)
+    public void OnAuthorization(AuthorizationFilterContext context)
     {
-        _clientsOptions = clientsOptions.Value;
-    }
-
-    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
-    {
-        var httpContext = context.HttpContext;
-
-        if (!httpContext.Request.Headers.TryGetValue(ApiKeyHeaderName, out var userApiKey))
+        if (!IsApiKeyValid(context.HttpContext))
         {
             context.Result = new UnauthorizedResult();
-            return;
         }
-
-        var apiKey = _clientsOptions.Clients
-            .Where(c => c.ApiKey == userApiKey)
-            .Select(c => c.ApiKey)
-            .FirstOrDefault();
-
-        if (!IsApiKeyValid(userApiKey, apiKey))
-        {
-            context.Result = new UnauthorizedResult();
-            return;
-        }
-
-        await next();
     }
 
-    private static bool IsApiKeyValid(string? userApiKey, string? apiKey) =>
-        userApiKey switch
-        {
-            _ when string.IsNullOrWhiteSpace(userApiKey) => false,
-            _ when apiKey is null || apiKey != userApiKey => false,
-            _ => true
-        };
+    private static bool IsApiKeyValid(HttpContext context)
+    {
+        string? apiKey = context.Request.Headers[ApiKeyHeaderName];
+        if (string.IsNullOrWhiteSpace(apiKey)) return false;
+
+        var clients = context.RequestServices
+                        .GetRequiredService<IOptions<ClientsOptions>>()
+                        .Value
+                        .Clients;
+
+        return clients.Any(c => c.ApiKey == apiKey);
+    }
 }

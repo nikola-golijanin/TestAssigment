@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using TestAssigmentAPI.Middleware;
+using TestAssigmentAPI.Filters;
 
 namespace TestAssigmentAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [ServiceFilter(typeof(ApiKeyAttribute))]
+    [ApiKey]
     public class WeatherForecastController : ControllerBase
     {
 
