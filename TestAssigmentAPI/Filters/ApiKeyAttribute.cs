@@ -1,32 +1,28 @@
-﻿using Microsoft.Extensions.Options;
-using System.Net;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Options;
 using TestAssigmentAPI.Options;
 
 namespace TestAssigmentAPI.Middleware;
 
-public class ApiKeyMiddleware
+internal sealed class ApiKeyAttribute : IAsyncActionFilter
 {
-    private readonly RequestDelegate _next;
-    private readonly ClientsOptions _clientsOptions;
-
-
     private const string ApiKeyHeaderName = "X-API-Key";
 
-    public ApiKeyMiddleware(
-        RequestDelegate next,
-        IOptions<ClientsOptions> clientsOptions)
+    private readonly ClientsOptions _clientsOptions;
+
+    public ApiKeyAttribute(IOptions<ClientsOptions> clientsOptions)
     {
-        _next = next;
         _clientsOptions = clientsOptions.Value;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        var httpContext = context.HttpContext;
 
-        if (!context.Request.Headers.TryGetValue(ApiKeyHeaderName, out var userApiKey))
+        if (!httpContext.Request.Headers.TryGetValue(ApiKeyHeaderName, out var userApiKey))
         {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            await context.Response.WriteAsync("Api Key was not provided ");
+            context.Result = new UnauthorizedResult();
             return;
         }
 
@@ -37,11 +33,11 @@ public class ApiKeyMiddleware
 
         if (!IsApiKeyValid(userApiKey, apiKey))
         {
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            context.Result = new UnauthorizedResult();
             return;
         }
 
-        await _next(context);
+        await next();
     }
 
     private static bool IsApiKeyValid(string? userApiKey, string? apiKey) =>

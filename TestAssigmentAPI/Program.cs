@@ -1,4 +1,5 @@
 using Serilog;
+using TestAssigmentAPI.Extensions;
 using TestAssigmentAPI.Middleware;
 using TestAssigmentAPI.Options;
 
@@ -6,17 +7,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration));
-
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<RequestLoggingFilter>();
 });
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.RegisterSwaggerUI();
+
+builder.Host.UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration));
+
+
 
 builder.Services
     .AddOptions<ClientsOptions>()
